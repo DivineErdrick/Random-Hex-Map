@@ -12,6 +12,9 @@ public class TilePlacerUI : MonoBehaviour {
     Text textColumnsPlace;
     Text textColumnsValue;
     int columns;
+    public int Columns {
+        get { return columns; }
+    }
 
     public int maxRows = 10;
     Slider sliderRows;
@@ -19,6 +22,9 @@ public class TilePlacerUI : MonoBehaviour {
     Text textRowsPlace;
     Text textRowsValue;
     int rows;
+    public int Rows {
+        get { return rows; }
+    }
 
     Slider sliderPlainsWeight;
     InputField inputPlainsWeight;

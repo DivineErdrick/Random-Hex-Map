@@ -6,6 +6,6 @@ public class HexTile : MonoBehaviour {
 
     public TilePlacer.TileType currentTile;
 
-    public int tileRow;
     public int tileColumn;
+    public int tileRow;
 }
