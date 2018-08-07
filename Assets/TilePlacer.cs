@@ -42,17 +42,30 @@ public class TilePlacer : MonoBehaviour {
                 int randRow = Random.Range(0, rows);
                 Debug.Log("Attempting to place hex tile at Column " + randColumn + ", Row " + randRow);
 
-                GameObject newTile = Instantiate(availableTiles[0]);
-                if (newTile) {
-                    newTile.transform.parent = tileMap.transform;
-                    float tileOffset = (randRow % 2 == 0) ? 0 : 0.5f;
-                    newTile.transform.position = new Vector3(randColumn + tileOffset, randRow * (float)(tileWidth + 2) / tileHeight, 0);
+                bool tilePlacedThere = false;
+                foreach (HexTile hexTile in hexTiles) {
 
-                    HexTile newHex = newTile.GetComponent<HexTile>();
-                    if (newHex) {
-                        newHex.tileColumn = randColumn;
-                        newHex.tileRow = randRow;
-                        Debug.Log("New Hex Tile created at Column " + newHex.tileColumn + ", Row " + newHex.tileRow);
+                    if (hexTile.tileColumn == randColumn && hexTile.tileRow == randRow) {
+                        tilePlacedThere = true;
+                    }
+                }
+                if ( ! tilePlacedThere) {
+
+                    GameObject newTile = Instantiate(availableTiles[0]);
+
+                    if (newTile) {
+
+                        newTile.transform.parent = tileMap.transform;
+                        float tileOffset = (randRow % 2 == 0) ? 0 : 0.5f;
+                        newTile.transform.position = new Vector3(randColumn + tileOffset, randRow * (float)(tileWidth + 2) / tileHeight, 0);
+
+                        HexTile newHex = newTile.GetComponent<HexTile>();
+
+                        if (newHex) {
+                            newHex.tileColumn = randColumn;
+                            newHex.tileRow = randRow;
+                            Debug.Log("New Hex Tile created at Column " + newHex.tileColumn + ", Row " + newHex.tileRow);
+                        }
                     }
                 }
             } else {
