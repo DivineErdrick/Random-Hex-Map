@@ -35,27 +35,29 @@ public class TilePlacer : MonoBehaviour {
 
         if (runGenerator) {
 
-            List<HexTile> hexTiles;
+            HexTile[] hexTiles = FindObjectsOfType<HexTile>();
 
-            int randColumn = Random.Range(0, columns);
-            int randRow = Random.Range(0, rows);
-            Debug.Log("Attempting to place hex tile at Column " + randColumn + ", Row " + randRow);
+            if (hexTiles.Length < columns * rows) {
+                int randColumn = Random.Range(0, columns);
+                int randRow = Random.Range(0, rows);
+                Debug.Log("Attempting to place hex tile at Column " + randColumn + ", Row " + randRow);
 
-            GameObject newTile = Instantiate(availableTiles[0]);
-            if (newTile) {
-                newTile.transform.parent = tileMap.transform;
-                float tileOffset = (randRow % 2 == 0) ? 0 : 0.5f;
-                newTile.transform.position = new Vector3(randColumn + tileOffset, randRow * (float)(tileWidth+2)/tileHeight, 0);
+                GameObject newTile = Instantiate(availableTiles[0]);
+                if (newTile) {
+                    newTile.transform.parent = tileMap.transform;
+                    float tileOffset = (randRow % 2 == 0) ? 0 : 0.5f;
+                    newTile.transform.position = new Vector3(randColumn + tileOffset, randRow * (float)(tileWidth + 2) / tileHeight, 0);
 
-                HexTile newHex = newTile.GetComponent<HexTile>();
-                if (newHex) {
-                    newHex.tileColumn = randColumn;
-                    newHex.tileRow = randRow;
-                    Debug.Log("New Hex Tile created at Column " + newHex.tileColumn + ", Row " + newHex.tileRow);
+                    HexTile newHex = newTile.GetComponent<HexTile>();
+                    if (newHex) {
+                        newHex.tileColumn = randColumn;
+                        newHex.tileRow = randRow;
+                        Debug.Log("New Hex Tile created at Column " + newHex.tileColumn + ", Row " + newHex.tileRow);
+                    }
                 }
+            } else {
+                runGenerator = false;
             }
-
-            runGenerator = false;
         }
     }
 
