@@ -80,7 +80,17 @@ public class TilePlacer : MonoBehaviour {
 
             columns = tilePlacerUI.Columns;
             rows = tilePlacerUI.Rows;
-            runGenerator = true;
+
+            HexTile[] hexTiles = FindObjectsOfType<HexTile>();
+            foreach (HexTile hexTile in hexTiles) {
+                Destroy(hexTile.gameObject);
+            }
+            StartCoroutine(RunGenerator());
         }
+    }
+
+    IEnumerator RunGenerator () {
+        yield return new WaitForSeconds(0.5f);
+        runGenerator = true;
     }
 }
