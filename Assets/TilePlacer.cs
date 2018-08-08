@@ -19,6 +19,10 @@ public class TilePlacer : MonoBehaviour {
     bool runGenerator = false;
     int columns;
     int rows;
+    int minColumn;
+    int minRow;
+    int maxColumn;
+    int maxRow;
     int mapSize;
 
     void Start () {
@@ -39,35 +43,51 @@ public class TilePlacer : MonoBehaviour {
             HexTile[] hexTiles = FindObjectsOfType<HexTile>();
 
             if (hexTiles.Length < mapSize) {
-                int randColumn = Random.Range(0, columns);
-                int randRow = Random.Range(0, rows);
+
+                Debug.Log("Placing tiles between column " + minColumn + " and " + (maxColumn - 1));
+                Debug.Log("Placing tiles between row " + minRow + " and " + (maxRow - 1));
+                int randColumn = Random.Range(minColumn, maxColumn);
+                int randRow = Random.Range(minRow, maxRow);
                 Debug.Log("Attempting to place hex tile at Column " + randColumn + ", Row " + randRow);
 
-                int columnCount = 0;
-                int rowCount = 0;
+                //Check if the tile has already been placed and try to shrink the area
                 bool tilePlacedThere = false;
+                int maxColumnCount = 0;
+                int maxRowCount = 0;
+                int minColumnCount = 0;
+                int minRowCount = 0;
+                HexTile[] placedHexTiles = FindObjectsOfType<HexTile>();
                 foreach (HexTile hexTile in hexTiles) {
-                    if (hexTile.tileColumn == columns - 1) {
-                        columnCount++;
-                    }
-                    if (hexTile.tileRow == rowCount - 1) {
-                        rowCount++;
-                    }
-
                     if (hexTile.tileColumn == randColumn && hexTile.tileRow == randRow) {
                         tilePlacedThere = true;
                     }
+                    if (hexTile.tileColumn == maxColumn - 1) {
+                        maxColumnCount++;
+                    }
+                    if (hexTile.tileRow == maxRow - 1) {
+                        maxRowCount++;
+                    }
+                    if (hexTile.tileColumn == minColumn) {
+                        minColumnCount++;
+                    }
+                    if (hexTile.tileRow == minRow) {
+                        minRowCount++;
+                    }
+                }
+                if (maxColumnCount == rows && minColumn < maxColumn - 1) {
+                    maxColumn--;
+                }
+                if (maxRowCount == columns && minRow < maxRow - 1) {
+                    maxRow--;
+                }
+                if (minColumnCount == rows && minColumn < maxColumn - 1) {
+                    minColumn++;
+                }
+                if (minRowCount == columns && minRow < maxRow - 1) {
+                    minRow++;
                 }
 
-                if (columnCount == rows && rowCount == columns) {
-                    columns--;
-                    rows--;
-                } else if (columnCount == rows) {
-                    columns--;
-                } else if (rowCount == columns) {
-                    rows--;
-                }
-
+                //If there isn't a tile at the location, place the tile
                 if ( ! tilePlacedThere) {
 
                     GameObject newTile = Instantiate(availableTiles[0]);
@@ -100,6 +120,10 @@ public class TilePlacer : MonoBehaviour {
             columns = tilePlacerUI.Columns;
             rows = tilePlacerUI.Rows;
             mapSize = columns * rows;
+            minColumn = 0;
+            minRow = 0;
+            maxColumn = columns;
+            maxRow = rows;
 
             HexTile[] hexTiles = FindObjectsOfType<HexTile>();
             foreach (HexTile hexTile in hexTiles) {
