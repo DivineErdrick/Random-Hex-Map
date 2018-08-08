@@ -24,6 +24,8 @@ public class TilePlacer : MonoBehaviour {
     int maxColumn;
     int maxRow;
     int mapSize;
+    int plainsWeight;
+    int forestWeight;
 
     void Start () {
 
@@ -56,7 +58,6 @@ public class TilePlacer : MonoBehaviour {
                 int maxRowCount = 0;
                 int minColumnCount = 0;
                 int minRowCount = 0;
-                HexTile[] placedHexTiles = FindObjectsOfType<HexTile>();
                 foreach (HexTile hexTile in hexTiles) {
                     if (hexTile.tileColumn == randColumn && hexTile.tileRow == randRow) {
                         tilePlacedThere = true;
@@ -90,7 +91,14 @@ public class TilePlacer : MonoBehaviour {
                 //If there isn't a tile at the location, place the tile
                 if ( ! tilePlacedThere) {
 
-                    GameObject newTile = Instantiate(availableTiles[0]);
+                    int randTileType = Random.Range(0, (plainsWeight + forestWeight));
+                    GameObject newTile;
+                    if (randTileType < plainsWeight) {
+                        newTile = availableTiles[0];
+                    } else {
+                        newTile = availableTiles[1];
+                    }
+                        newTile = Instantiate(newTile);
 
                     if (newTile) {
 
@@ -124,6 +132,8 @@ public class TilePlacer : MonoBehaviour {
             minRow = 0;
             maxColumn = columns;
             maxRow = rows;
+            plainsWeight = tilePlacerUI.PlainsWeight;
+            forestWeight = tilePlacerUI.ForesWeight;
 
             HexTile[] hexTiles = FindObjectsOfType<HexTile>();
             foreach (HexTile hexTile in hexTiles) {

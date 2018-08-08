@@ -31,6 +31,9 @@ public class TilePlacerUI : MonoBehaviour {
     Text textPlainsWeightPlace;
     Text textPlainsWeightValue;
     int plainsWeight;
+    public int PlainsWeight {
+        get { return plainsWeight; }
+    }
 
     Slider sliderPlainsRate;
     InputField inputPlainsRate;
@@ -43,6 +46,9 @@ public class TilePlacerUI : MonoBehaviour {
     Text textForestWeightPlace;
     Text textForestWeightValue;
     int forestWeight;
+    public int ForesWeight {
+        get { return forestWeight; }
+    }
 
     Slider sliderForestRate;
     InputField inputForestRate;
