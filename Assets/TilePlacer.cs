@@ -6,6 +6,8 @@ using UnityEngine.Assertions;
 public class TilePlacer : MonoBehaviour {
 
     public enum TileType { Plains, Forest };
+    enum DirectionOfGrowth { None, UpAndLeft, UpAndRight, Right, DownAndRight, DownAndLeft, Left };
+    DirectionOfGrowth directionOfGrowth;
 
     TilePlacerUI tilePlacerUI;
 
@@ -17,6 +19,8 @@ public class TilePlacer : MonoBehaviour {
 
     GameObject tileMap;
     bool runGenerator = false;
+    bool randomPlacement = true;
+
     int columns;
     int rows;
     int minColumn;
@@ -48,23 +52,29 @@ public class TilePlacer : MonoBehaviour {
 
             if (hexTiles.Length < mapSize) {
 
-                ReduceSearchArea(hexTiles);
-                Debug.Log("Placing tiles between column " + minColumn + " and " + (maxColumn - 1));
-                Debug.Log("Placing tiles between row " + minRow + " and " + (maxRow - 1));
-                int randColumn = Random.Range(minColumn, maxColumn);
-                int randRow = Random.Range(minRow, maxRow);
-                Debug.Log("Attempting to place hex tile at Column " + randColumn + ", Row " + randRow);
+                if (randomPlacement) {
+                    ReduceSearchArea(hexTiles);
+                    Debug.Log("Placing tiles between column " + minColumn + " and " + (maxColumn - 1));
+                    Debug.Log("Placing tiles between row " + minRow + " and " + (maxRow - 1));
+                    int randColumn = Random.Range(minColumn, maxColumn);
+                    int randRow = Random.Range(minRow, maxRow);
+                    columnToPlaceIn = randColumn;
+                    rowToPlaceIn = randRow;
+                } else {
+                    GrowFromTile();
+                }
+                Debug.Log("Attempting to place hex tile at Column " + columnToPlaceIn + ", Row " + rowToPlaceIn);
 
-                columnToPlaceIn = randColumn;
-                rowToPlaceIn = randRow;
-
-                //Check if the tile has already been placed and try to shrink the area
-                bool tilePlaceHere = TilePlacedHere(hexTiles, columnToPlaceIn, rowToPlaceIn);
+                //Check if the tile has already been placed
+                bool tilePlacedHere = TilePlacedHere(hexTiles, columnToPlaceIn, rowToPlaceIn);
 
                 //If there isn't a tile at the location, place the tile
-                if ( ! tilePlaceHere) {
+                if ( ! tilePlacedHere) {
 
                     SpawnNewTile(NewTile(), columnToPlaceIn, rowToPlaceIn);
+                    if (randomPlacement) {
+                        randomPlacement = false;
+                    }
                 }
             } else {
                 runGenerator = false;
@@ -76,6 +86,8 @@ public class TilePlacer : MonoBehaviour {
 
         if (!runGenerator) {
 
+            directionOfGrowth = DirectionOfGrowth.UpAndLeft;
+            randomPlacement = true;
             columns = tilePlacerUI.Columns;
             rows = tilePlacerUI.Rows;
             mapSize = columns * rows;
@@ -129,6 +141,49 @@ public class TilePlacer : MonoBehaviour {
         }
         if (minRowCount == columns && minRow < maxRow - 1) {
             minRow++;
+        }
+    }
+
+    void GrowFromTile () {
+        switch (directionOfGrowth) {
+            case DirectionOfGrowth.UpAndLeft:
+                if (rowToPlaceIn % 2 == 0) {
+                    columnToPlaceIn--;
+                }
+                rowToPlaceIn++;
+                directionOfGrowth = DirectionOfGrowth.UpAndRight;
+                break;
+            case DirectionOfGrowth.UpAndRight:
+                if (rowToPlaceIn % 2 != 0) {
+                    columnToPlaceIn++;
+                }
+                rowToPlaceIn++;
+                directionOfGrowth = DirectionOfGrowth.Right;
+                break;
+            case DirectionOfGrowth.Right:
+                columnToPlaceIn++;
+                directionOfGrowth = DirectionOfGrowth.DownAndRight;
+                break;
+            case DirectionOfGrowth.DownAndRight:
+                if (rowToPlaceIn % 2 != 0) {
+                    columnToPlaceIn++;
+                }
+                rowToPlaceIn--;
+                directionOfGrowth = DirectionOfGrowth.DownAndLeft;
+                break;
+            case DirectionOfGrowth.DownAndLeft:
+                if (rowToPlaceIn % 2 == 0) {
+                    columnToPlaceIn--;
+                }
+                rowToPlaceIn--;
+                directionOfGrowth = DirectionOfGrowth.Left;
+                break;
+            case DirectionOfGrowth.Left:
+                columnToPlaceIn--;
+                directionOfGrowth = DirectionOfGrowth.None;//UpAndLeft;
+                break;
+            default:
+                break;
         }
     }
 
