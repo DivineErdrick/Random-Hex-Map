@@ -225,13 +225,25 @@ public class TilePlacer : MonoBehaviour {
 
     GameObject PickTile () {
         GameObject newTile;
-        int randTileType = Random.Range(0, (plainsWeight + forestWeight));
-        if (randTileType >= plainsWeight) {
-            newTile = availableTiles[1];
+
+        if (randomPlacement) {
+            int randTileType = Random.Range(0, (plainsWeight + forestWeight));
+            if (randTileType >= plainsWeight) {
+                newTile = availableTiles[1];
+            } else {
+                newTile = availableTiles[0];
+            }
         } else {
-            newTile = availableTiles[0];
+            switch (tileToGrowFrom.currentTile) {
+                case TileType.Forest:
+                    newTile = availableTiles[1];
+                    break;
+                default:
+                    newTile = availableTiles[0];
+                    break;
+            }
         }
-        return newTile;
+            return newTile;        
     }
 
     GameObject SpawnNewTile (GameObject pickedTile, int column, int row) {
