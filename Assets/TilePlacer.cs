@@ -18,6 +18,8 @@ public class TilePlacer : MonoBehaviour {
     public GameObject[] availableTiles;
 
     GameObject tileMap;
+    HexTile tileToGrowFrom;
+
     bool runGenerator = false;
     bool randomPlacement = true;
 
@@ -50,29 +52,31 @@ public class TilePlacer : MonoBehaviour {
 
             HexTile[] hexTiles = FindObjectsOfType<HexTile>();
 
-            if (hexTiles.Length < mapSize) {
+            if (hexTiles.Length < mapSize) { //Assumption: Should currently always be true
 
-                if (randomPlacement) {
+                if (randomPlacement) { //Assumption: Should only be true on the first frame
                     ReduceSearchArea(hexTiles);
-                    Debug.Log("Placing tiles between column " + minColumn + " and " + (maxColumn - 1));
-                    Debug.Log("Placing tiles between row " + minRow + " and " + (maxRow - 1));
+                    Debug.Log("Placing random tiles between column " + minColumn + " and " + (maxColumn - 1));
+                    Debug.Log("Placing random tiles between row " + minRow + " and " + (maxRow - 1));
                     int randColumn = Random.Range(minColumn, maxColumn);
                     int randRow = Random.Range(minRow, maxRow);
                     columnToPlaceIn = randColumn;
                     rowToPlaceIn = randRow;
                 } else {
-                    GrowFromTile();
+                    Debug.Log("Attempting to grow from tile at column " + tileToGrowFrom.tileColumn + " row " + tileToGrowFrom.tileRow);
+                    GrowFromTile(tileToGrowFrom);
                 }
-                Debug.Log("Attempting to place hex tile at Column " + columnToPlaceIn + ", Row " + rowToPlaceIn);
 
+                Debug.Log("Attempting to place hex tile at Column " + columnToPlaceIn + ", Row " + rowToPlaceIn);
                 //Check if the tile has already been placed
                 bool tilePlacedHere = TilePlacedHere(hexTiles, columnToPlaceIn, rowToPlaceIn);
 
-                //If there isn't a tile at the location, place the tile
                 if ( ! tilePlacedHere && CanGrowHere(columnToPlaceIn, rowToPlaceIn)) {
-
-                    SpawnNewTile(NewTile(), columnToPlaceIn, rowToPlaceIn);
+                    GameObject pickedTile = PickTile();
+                    GameObject newTile = SpawnNewTile(pickedTile, columnToPlaceIn, rowToPlaceIn);
                     if (randomPlacement) {
+                        tileToGrowFrom = newTile.GetComponent<HexTile>();
+                        Debug.Log("Tile at " + tileToGrowFrom.tileColumn + ", " + tileToGrowFrom.tileRow + " has been set as the tile to grow from.");
                         randomPlacement = false;
                     }
                 }
@@ -86,6 +90,11 @@ public class TilePlacer : MonoBehaviour {
 
         if (!runGenerator) {
 
+            HexTile[] hexTiles = FindObjectsOfType<HexTile>();
+            foreach (HexTile hexTile in hexTiles) {
+                Destroy(hexTile.gameObject);
+            }
+
             directionOfGrowth = DirectionOfGrowth.UpAndLeft;
             randomPlacement = true;
             columns = tilePlacerUI.Columns;
@@ -98,18 +107,14 @@ public class TilePlacer : MonoBehaviour {
             plainsWeight = tilePlacerUI.PlainsWeight;
             forestWeight = tilePlacerUI.ForesWeight;
 
-            HexTile[] hexTiles = FindObjectsOfType<HexTile>();
-            foreach (HexTile hexTile in hexTiles) {
-                Destroy(hexTile.gameObject);
-            }
-            StartCoroutine(RunGenerator());
+            runGenerator = true;
         }
     }
 
-    IEnumerator RunGenerator () {
-        yield return new WaitForSeconds(0.5f);
-        runGenerator = true;
-    }
+    //IEnumerator RunGenerator () {
+    //    yield return new WaitForSeconds(0.5f);
+    //    runGenerator = true;
+    //}
 
     void ReduceSearchArea (HexTile[] hexTiles) {
         int maxColumnCount = 0;
@@ -144,42 +149,52 @@ public class TilePlacer : MonoBehaviour {
         }
     }
 
-    void GrowFromTile () {
+    void GrowFromTile (HexTile tile) {
         switch (directionOfGrowth) {
             case DirectionOfGrowth.UpAndLeft:
-                if (rowToPlaceIn % 2 == 0) {
-                    columnToPlaceIn--;
+                if (tile.tileRow % 2 == 0) {
+                    columnToPlaceIn = tile.tileColumn - 1;
+                } else {
+                    columnToPlaceIn = tile.tileColumn;
                 }
-                rowToPlaceIn++;
+                rowToPlaceIn = tile.tileRow + 1;
                 directionOfGrowth = DirectionOfGrowth.UpAndRight;
                 break;
             case DirectionOfGrowth.UpAndRight:
-                if (rowToPlaceIn % 2 != 0) {
-                    columnToPlaceIn++;
+                if (tile.tileRow % 2 != 0) {
+                    columnToPlaceIn = tile.tileColumn + 1;
+                } else {
+                    columnToPlaceIn = tile.tileColumn;
                 }
-                rowToPlaceIn++;
+                rowToPlaceIn = tile.tileRow + 1;
                 directionOfGrowth = DirectionOfGrowth.Right;
                 break;
             case DirectionOfGrowth.Right:
-                columnToPlaceIn++;
+                columnToPlaceIn = tile.tileColumn + 1;
+                rowToPlaceIn = tile.tileRow;
                 directionOfGrowth = DirectionOfGrowth.DownAndRight;
                 break;
             case DirectionOfGrowth.DownAndRight:
-                if (rowToPlaceIn % 2 != 0) {
-                    columnToPlaceIn++;
+                if (tile.tileRow % 2 != 0) {
+                    columnToPlaceIn = tile.tileColumn + 1;
+                } else {
+                    columnToPlaceIn = tile.tileColumn;
                 }
-                rowToPlaceIn--;
+                rowToPlaceIn = tile.tileRow - 1;
                 directionOfGrowth = DirectionOfGrowth.DownAndLeft;
                 break;
             case DirectionOfGrowth.DownAndLeft:
-                if (rowToPlaceIn % 2 == 0) {
-                    columnToPlaceIn--;
+                if (tile.tileRow % 2 == 0) {
+                    columnToPlaceIn = tile.tileColumn - 1;
+                } else {
+                    columnToPlaceIn = tile.tileColumn;
                 }
-                rowToPlaceIn--;
+                rowToPlaceIn = tile.tileRow - 1;
                 directionOfGrowth = DirectionOfGrowth.Left;
                 break;
             case DirectionOfGrowth.Left:
-                columnToPlaceIn--;
+                columnToPlaceIn = tile.tileColumn - 1;
+                rowToPlaceIn = tile.tileRow;
                 directionOfGrowth = DirectionOfGrowth.None;//UpAndLeft;
                 break;
             default:
@@ -190,13 +205,13 @@ public class TilePlacer : MonoBehaviour {
 
     bool TilePlacedHere (HexTile[] hexTiles, int column, int row) {
 
-        bool tilePlacedThere = false;
+        bool tilePlacedHere = false;
         foreach (HexTile hexTile in hexTiles) {
             if (hexTile.tileColumn == column && hexTile.tileRow == row) {
-                tilePlacedThere = true;
+                tilePlacedHere = true;
             }
         }
-        return tilePlacedThere;
+        return tilePlacedHere;
     }
 
     bool CanGrowHere (int column, int row) {
@@ -208,7 +223,7 @@ public class TilePlacer : MonoBehaviour {
         return canGrowHere;
     }
 
-    GameObject NewTile () {
+    GameObject PickTile () {
         GameObject newTile;
         int randTileType = Random.Range(0, (plainsWeight + forestWeight));
         if (randTileType >= plainsWeight) {
@@ -219,8 +234,8 @@ public class TilePlacer : MonoBehaviour {
         return newTile;
     }
 
-    void SpawnNewTile (GameObject newTile, int column, int row) {
-        GameObject tile = Instantiate(newTile);
+    GameObject SpawnNewTile (GameObject pickedTile, int column, int row) {
+        GameObject tile = Instantiate(pickedTile);
 
         if (tile) {
 
@@ -236,5 +251,6 @@ public class TilePlacer : MonoBehaviour {
                 Debug.Log("New Hex Tile created at Column " + newHex.tileColumn + ", Row " + newHex.tileRow);
             }
         }
+        return tile;
     }
 }
