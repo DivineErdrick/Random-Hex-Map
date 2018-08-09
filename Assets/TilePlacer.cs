@@ -69,7 +69,7 @@ public class TilePlacer : MonoBehaviour {
                 bool tilePlacedHere = TilePlacedHere(hexTiles, columnToPlaceIn, rowToPlaceIn);
 
                 //If there isn't a tile at the location, place the tile
-                if ( ! tilePlacedHere) {
+                if ( ! tilePlacedHere && CanGrowHere(columnToPlaceIn, rowToPlaceIn)) {
 
                     SpawnNewTile(NewTile(), columnToPlaceIn, rowToPlaceIn);
                     if (randomPlacement) {
@@ -183,6 +183,7 @@ public class TilePlacer : MonoBehaviour {
                 directionOfGrowth = DirectionOfGrowth.None;//UpAndLeft;
                 break;
             default:
+                runGenerator = false;
                 break;
         }
     }
@@ -196,6 +197,15 @@ public class TilePlacer : MonoBehaviour {
             }
         }
         return tilePlacedThere;
+    }
+
+    bool CanGrowHere (int column, int row) {
+        bool canGrowHere = true;
+        if (0 > column || column >= columns ||
+            0 > row || row >= rows) {
+            canGrowHere = false;
+        }
+        return canGrowHere;
     }
 
     GameObject NewTile () {
