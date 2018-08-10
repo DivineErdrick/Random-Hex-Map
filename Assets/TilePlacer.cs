@@ -124,6 +124,10 @@ public class TilePlacer : MonoBehaviour {
                 Destroy(hexTile.gameObject);
             }
 
+            newTile = null;
+            tileToGrowFrom = null;
+            tilesToGrowFrom.Clear();
+            growthSpotsClaimed.Clear();
             directionOfGrowth = DirectionOfGrowth.UpAndLeft;
             randomPlacement = true;
             columns = tilePlacerUI.Columns;
@@ -139,14 +143,14 @@ public class TilePlacer : MonoBehaviour {
             forestRate = tilePlacerUI.ForestRate;
             growthCount = 0;
 
-            runGenerator = true;
+            StartCoroutine(RunGenerator());
         }
     }
 
-    //IEnumerator RunGenerator () {
-    //    yield return new WaitForSeconds(0.5f);
-    //    runGenerator = true;
-    //}
+    IEnumerator RunGenerator() {
+        yield return new WaitForSeconds(0.5f);
+        runGenerator = true;
+    }
 
     void ReduceSearchArea (HexTile[] hexTiles) {
         int maxColumnCount = 0;

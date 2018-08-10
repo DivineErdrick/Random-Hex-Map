@@ -226,4 +226,7 @@ public class TilePlacerUI : MonoBehaviour {
                 break;
         }
     }
+    public void Quit () {
+        Application.Quit();
+    }
 }
