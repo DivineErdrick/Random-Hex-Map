@@ -19,6 +19,7 @@ public class TilePlacer : MonoBehaviour {
 
     GameObject tileMap;
     HexTile tileToGrowFrom;
+    List<GameObject> tilesToGrowFrom = new List<GameObject>();
 
     bool runGenerator = false;
     bool randomPlacement = true;
@@ -34,6 +35,7 @@ public class TilePlacer : MonoBehaviour {
     int rowToPlaceIn;
     int plainsWeight;
     int forestWeight;
+    int growthCount;
 
     void Start() {
 
@@ -54,7 +56,7 @@ public class TilePlacer : MonoBehaviour {
 
             if (hexTiles.Length < mapSize) { //Assumption: Should currently always be true
 
-                if (randomPlacement) { //Assumption: Should only be true on the first frame
+                if (randomPlacement) {
                     ReduceSearchArea(hexTiles);
                     Debug.Log("Placing random tiles between column " + minColumn + " and " + (maxColumn - 1));
                     Debug.Log("Placing random tiles between row " + minRow + " and " + (maxRow - 1));
@@ -76,11 +78,21 @@ public class TilePlacer : MonoBehaviour {
                     GameObject newTile = SpawnNewTile(pickedTile, columnToPlaceIn, rowToPlaceIn);
                     if (randomPlacement) {
                         tileToGrowFrom = newTile.GetComponent<HexTile>();
+                        tilesToGrowFrom.Add(newTile);
+                        growthCount = 6;
                         Debug.Log("Tile at " + tileToGrowFrom.tileColumn + ", " + tileToGrowFrom.tileRow + " has been set as the tile to grow from.");
                         randomPlacement = false;
                     }
                 }
+                if (growthCount < 0) {
+                    Debug.Log("Switching back to Random Placement.");
+                    randomPlacement = true;
+                } else {
+                    growthCount--;
+                    Debug.Log("Tiles left to grow is equal to " + growthCount);
+                }
             } else {
+                Debug.Log("Ending generation.");
                 runGenerator = false;
             }
         }
@@ -106,6 +118,7 @@ public class TilePlacer : MonoBehaviour {
             maxRow = rows;
             plainsWeight = tilePlacerUI.PlainsWeight;
             forestWeight = tilePlacerUI.ForesWeight;
+            growthCount = 0;
 
             runGenerator = true;
         }
@@ -195,10 +208,10 @@ public class TilePlacer : MonoBehaviour {
             case DirectionOfGrowth.Left:
                 columnToPlaceIn = tile.tileColumn - 1;
                 rowToPlaceIn = tile.tileRow;
-                directionOfGrowth = DirectionOfGrowth.None;//UpAndLeft;
+                directionOfGrowth = DirectionOfGrowth.UpAndLeft;
                 break;
             default:
-                runGenerator = false;
+                randomPlacement = true;
                 break;
         }
     }
