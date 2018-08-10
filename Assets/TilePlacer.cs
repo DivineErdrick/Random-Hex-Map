@@ -18,8 +18,10 @@ public class TilePlacer : MonoBehaviour {
     public GameObject[] availableTiles;
 
     GameObject tileMap;
+    GameObject newTile;
     HexTile tileToGrowFrom;
-    List<GameObject> tilesToGrowFrom = new List<GameObject>();
+    List<HexTile> tilesToGrowFrom = new List<HexTile>();
+    List<int[]> growthSpotsClaimed = new List<int[]>();
 
     bool runGenerator = false;
     bool randomPlacement = true;
@@ -34,7 +36,9 @@ public class TilePlacer : MonoBehaviour {
     int columnToPlaceIn;
     int rowToPlaceIn;
     int plainsWeight;
+    int plainsRate;
     int forestWeight;
+    int forestRate;
     int growthCount;
 
     void Start() {
@@ -54,7 +58,7 @@ public class TilePlacer : MonoBehaviour {
 
             HexTile[] hexTiles = FindObjectsOfType<HexTile>();
 
-            if (hexTiles.Length < mapSize) { //Assumption: Should currently always be true
+            if (hexTiles.Length < mapSize) {
 
                 if (randomPlacement) {
                     ReduceSearchArea(hexTiles);
@@ -70,29 +74,42 @@ public class TilePlacer : MonoBehaviour {
                 }
 
                 Debug.Log("Attempting to place hex tile at Column " + columnToPlaceIn + ", Row " + rowToPlaceIn);
-                //Check if the tile has already been placed
+                //Check if the tile has already been placed or attempted to place
                 bool tilePlacedHere = TilePlacedHere(hexTiles, columnToPlaceIn, rowToPlaceIn);
 
-                if ( ! tilePlacedHere && CanGrowHere(columnToPlaceIn, rowToPlaceIn)) {
+                if ( ! tilePlacedHere) {
                     GameObject pickedTile = PickTile();
-                    GameObject newTile = SpawnNewTile(pickedTile, columnToPlaceIn, rowToPlaceIn);
                     if (randomPlacement) {
+                        newTile = SpawnNewTile(pickedTile, columnToPlaceIn, rowToPlaceIn);
                         tileToGrowFrom = newTile.GetComponent<HexTile>();
-                        tilesToGrowFrom.Add(newTile);
+                        tilesToGrowFrom.Add(newTile.GetComponent<HexTile>());
                         growthCount = 6;
                         Debug.Log("Tile at " + tileToGrowFrom.tileColumn + ", " + tileToGrowFrom.tileRow + " has been set as the tile to grow from.");
                         randomPlacement = false;
+                    } else if (CanGrow(pickedTile.GetComponent<HexTile>().currentTile) && CanGrowHere(columnToPlaceIn, rowToPlaceIn)) {
+                        newTile = SpawnNewTile(pickedTile, columnToPlaceIn, rowToPlaceIn);
+                        tilesToGrowFrom.Add(newTile.GetComponent<HexTile>());
                     }
                 }
                 if (growthCount < 0) {
-                    Debug.Log("Switching back to Random Placement.");
-                    randomPlacement = true;
+                    tilesToGrowFrom.Remove(tileToGrowFrom);
+                    tilesToGrowFrom.TrimExcess();
+                    if (tilesToGrowFrom.Count > 0) {
+                        tileToGrowFrom = tilesToGrowFrom[0].GetComponent<HexTile>();
+                        growthCount = 6;
+                        Debug.Log("Setting new tile to go from as tile at " + tileToGrowFrom.tileColumn + ", " + tileToGrowFrom.tileRow);
+                    } else {
+                        Debug.Log("Switching back to Random Placement.");
+                        randomPlacement = true;
+                    }
                 } else {
                     growthCount--;
-                    Debug.Log("Tiles left to grow is equal to " + growthCount);
+                    growthSpotsClaimed.Add(new int[] { columnToPlaceIn, rowToPlaceIn });                    
+                    Debug.Log("Tiles left to grow is equal to " + growthCount + 1);
                 }
             } else {
                 Debug.Log("Ending generation.");
+                growthSpotsClaimed.Clear();
                 runGenerator = false;
             }
         }
@@ -117,7 +134,9 @@ public class TilePlacer : MonoBehaviour {
             maxColumn = columns;
             maxRow = rows;
             plainsWeight = tilePlacerUI.PlainsWeight;
+            plainsRate = tilePlacerUI.PlainsRate;
             forestWeight = tilePlacerUI.ForesWeight;
+            forestRate = tilePlacerUI.ForestRate;
             growthCount = 0;
 
             runGenerator = true;
@@ -232,6 +251,12 @@ public class TilePlacer : MonoBehaviour {
         if (0 > column || column >= columns ||
             0 > row || row >= rows) {
             canGrowHere = false;
+        } else if (growthSpotsClaimed.Count > 0) {
+            foreach (int[] columnRow in growthSpotsClaimed) {
+                if (column == columnRow[0] && row == columnRow[1]) {
+                    canGrowHere = false;
+                }
+            }
         }
         return canGrowHere;
     }
@@ -277,5 +302,25 @@ public class TilePlacer : MonoBehaviour {
             }
         }
         return tile;
+    }
+
+    bool CanGrow (TileType tileType) {
+        int rand = Random.Range(0, 100);
+        switch (tileType) {
+            case TileType.Plains:
+                if (rand < plainsRate) {
+                    return true;
+                } else {
+                    return false;
+                }
+            case TileType.Forest:
+                if (rand < forestRate) {
+                    return true;
+                } else {
+                    return false;
+                }
+            default:
+                return false;
+        }
     }
 }

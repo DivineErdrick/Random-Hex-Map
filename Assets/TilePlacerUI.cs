@@ -40,6 +40,9 @@ public class TilePlacerUI : MonoBehaviour {
     Text textPlainsRatePlace;
     Text textPlainsRateValue;
     int plainsRate;
+    public int PlainsRate {
+        get { return plainsRate; }
+    }
 
     Slider sliderForestWeight;
     InputField inputForestWeight;
@@ -55,6 +58,9 @@ public class TilePlacerUI : MonoBehaviour {
     Text textForestRatePlace;
     Text textForestRateValue;
     int forestRate;
+    public int ForestRate {
+        get { return forestRate; }
+    }
 
     // Use this for initialization
     void Start() {
