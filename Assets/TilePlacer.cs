@@ -20,6 +20,8 @@ public class TilePlacer : MonoBehaviour {
     GameObject tileMap;
     GameObject newTile;
     HexTile tileToGrowFrom;
+    [SerializeField]
+    List<int[]> availableTileLocations = new List<int[]>();
     List<HexTile> tilesToGrowFrom = new List<HexTile>();
     List<int[]> growthSpotsClaimed = new List<int[]>();
 
@@ -61,15 +63,16 @@ public class TilePlacer : MonoBehaviour {
             if (hexTiles.Length < mapSize) {
 
                 if (randomPlacement) {
-                    ReduceSearchArea(hexTiles);
-                    Debug.Log("Placing random tiles between column " + minColumn + " and " + (maxColumn - 1));
-                    Debug.Log("Placing random tiles between row " + minRow + " and " + (maxRow - 1));
-                    int randColumn = Random.Range(minColumn, maxColumn);
-                    int randRow = Random.Range(minRow, maxRow);
-                    columnToPlaceIn = randColumn;
-                    rowToPlaceIn = randRow;
+                    //ReduceSearchArea(hexTiles);
+                    //Debug.Log("Placing random tiles between column " + minColumn + " and " + (maxColumn - 1));
+                    //Debug.Log("Placing random tiles between row " + minRow + " and " + (maxRow - 1));
+                    //int randColumn = Random.Range(minColumn, maxColumn);
+                    //int randRow = Random.Range(minRow, maxRow);
+                    int rand = Random.Range(0, availableTileLocations.Count);
+                    columnToPlaceIn = availableTileLocations[rand][0];
+                    rowToPlaceIn = availableTileLocations[rand][1];
                 } else {
-                    Debug.Log("Attempting to grow from tile at column " + tileToGrowFrom.tileColumn + " row " + tileToGrowFrom.tileRow);
+                    //Debug.Log("Attempting to grow from tile at column " + tileToGrowFrom.tileColumn + " row " + tileToGrowFrom.tileRow);
                     GrowFromTile(tileToGrowFrom);
                 }
 
@@ -84,11 +87,13 @@ public class TilePlacer : MonoBehaviour {
                         tileToGrowFrom = newTile.GetComponent<HexTile>();
                         tilesToGrowFrom.Add(newTile.GetComponent<HexTile>());
                         growthCount = 6;
-                        Debug.Log("Tile at " + tileToGrowFrom.tileColumn + ", " + tileToGrowFrom.tileRow + " has been set as the tile to grow from.");
+                        //Debug.Log("Tile at " + tileToGrowFrom.tileColumn + ", " + tileToGrowFrom.tileRow + " has been set as the tile to grow from.");
+                        RemoveTileLocation();
                         randomPlacement = false;
                     } else if (CanGrow(pickedTile.GetComponent<HexTile>().currentTile) && CanGrowHere(columnToPlaceIn, rowToPlaceIn)) {
                         newTile = SpawnNewTile(pickedTile, columnToPlaceIn, rowToPlaceIn);
                         tilesToGrowFrom.Add(newTile.GetComponent<HexTile>());
+                        RemoveTileLocation();
                     }
                 }
                 if (growthCount < 0) {
@@ -97,18 +102,18 @@ public class TilePlacer : MonoBehaviour {
                     if (tilesToGrowFrom.Count > 0) {
                         tileToGrowFrom = tilesToGrowFrom[0].GetComponent<HexTile>();
                         growthCount = 6;
-                        Debug.Log("Setting new tile to go from as tile at " + tileToGrowFrom.tileColumn + ", " + tileToGrowFrom.tileRow);
+                        //Debug.Log("Setting new tile to go from as tile at " + tileToGrowFrom.tileColumn + ", " + tileToGrowFrom.tileRow);
                     } else {
-                        Debug.Log("Switching back to Random Placement.");
+                        //Debug.Log("Switching back to Random Placement.");
                         randomPlacement = true;
                     }
                 } else {
                     growthCount--;
                     growthSpotsClaimed.Add(new int[] { columnToPlaceIn, rowToPlaceIn });                    
-                    Debug.Log("Tiles left to grow is equal to " + growthCount + 1);
+                    //Debug.Log("Tiles left to grow is equal to " + growthCount + 1);
                 }
             } else {
-                Debug.Log("Ending generation.");
+                //Debug.Log("Ending generation.");
                 growthSpotsClaimed.Clear();
                 runGenerator = false;
             }
@@ -117,7 +122,7 @@ public class TilePlacer : MonoBehaviour {
 
     public void PlaceTiles () {
 
-        if (!runGenerator) {
+        if ( ! runGenerator) {
 
             HexTile[] hexTiles = FindObjectsOfType<HexTile>();
             foreach (HexTile hexTile in hexTiles) {
@@ -142,10 +147,41 @@ public class TilePlacer : MonoBehaviour {
             forestWeight = tilePlacerUI.ForesWeight;
             forestRate = tilePlacerUI.ForestRate;
             growthCount = 0;
+            availableTileLocations.Clear();
+            CreateTileLocations();
 
             StartCoroutine(RunGenerator());
         }
     }
+
+    void CreateTileLocations () {
+        for (int x = 0; x < columns; x++ ) {
+            for (int y = 0; y < rows; y++) {
+                availableTileLocations.Add(new int[] { x, y });
+                //Debug.Log("Addin tile location at " + x + ", " + y + " to available tile locations.");
+            }
+        }
+    }
+
+    void RemoveTileLocation () {
+        int currentIndex = 0;
+        for (int i = 0; i < availableTileLocations.Count; i++) {
+            if (availableTileLocations[i][0] == columnToPlaceIn && availableTileLocations[i][1] == rowToPlaceIn) {
+                currentIndex = i;
+            }
+        }
+        availableTileLocations.RemoveAt(currentIndex);
+        availableTileLocations.TrimExcess();
+    }
+
+    //void RandomizeTileLocations () {
+    //    for (int i = 0; i < availableTileLocations.Count; i++) {
+    //        int rand = Random.Range(i, availableTileLocations.Count);
+    //        int[] temp = availableTileLocations[i];
+    //        availableTileLocations[i] = availableTileLocations[rand];
+    //        availableTileLocations[rand] = temp;
+    //    }
+    //}
 
     IEnumerator RunGenerator() {
         yield return new WaitForSeconds(0.5f);
@@ -302,7 +338,7 @@ public class TilePlacer : MonoBehaviour {
             if (newHex) {
                 newHex.tileColumn = column;
                 newHex.tileRow = row;
-                Debug.Log("New Hex Tile created at Column " + newHex.tileColumn + ", Row " + newHex.tileRow);
+                //Debug.Log("New Hex Tile created at Column " + newHex.tileColumn + ", Row " + newHex.tileRow);
             }
         }
         return tile;
