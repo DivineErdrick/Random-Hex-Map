@@ -68,34 +68,44 @@ public class TilePlacer : MonoBehaviour {
                     //Debug.Log("Placing random tiles between row " + minRow + " and " + (maxRow - 1));
                     //int randColumn = Random.Range(minColumn, maxColumn);
                     //int randRow = Random.Range(minRow, maxRow);
+
+                    //Find a random tile location and set that location for the new seed.
                     int rand = Random.Range(0, availableTileLocations.Count);
                     columnToPlaceIn = availableTileLocations[rand][0];
                     rowToPlaceIn = availableTileLocations[rand][1];
                 } else {
                     //Debug.Log("Attempting to grow from tile at column " + tileToGrowFrom.tileColumn + " row " + tileToGrowFrom.tileRow);
+
+                    //Grow from the seed.
                     GrowFromTile(tileToGrowFrom);
                 }
 
-                Debug.Log("Attempting to place hex tile at Column " + columnToPlaceIn + ", Row " + rowToPlaceIn);
+                //Debug.Log("Attempting to place hex tile at Column " + columnToPlaceIn + ", Row " + rowToPlaceIn);
+                
                 //Check if the tile has already been placed or attempted to place
-                bool tilePlacedHere = TilePlacedHere(hexTiles, columnToPlaceIn, rowToPlaceIn);
+                //bool tilePlacedHere = TilePlacedHere(hexTiles, columnToPlaceIn, rowToPlaceIn);
 
-                if ( ! tilePlacedHere) {
-                    GameObject pickedTile = PickTile();
-                    if (randomPlacement) {
-                        newTile = SpawnNewTile(pickedTile, columnToPlaceIn, rowToPlaceIn);
-                        tileToGrowFrom = newTile.GetComponent<HexTile>();
-                        tilesToGrowFrom.Add(newTile.GetComponent<HexTile>());
-                        growthCount = 6;
-                        //Debug.Log("Tile at " + tileToGrowFrom.tileColumn + ", " + tileToGrowFrom.tileRow + " has been set as the tile to grow from.");
-                        RemoveTileLocation();
-                        randomPlacement = false;
-                    } else if (CanGrow(pickedTile.GetComponent<HexTile>().currentTile) && CanGrowHere(columnToPlaceIn, rowToPlaceIn)) {
-                        newTile = SpawnNewTile(pickedTile, columnToPlaceIn, rowToPlaceIn);
-                        tilesToGrowFrom.Add(newTile.GetComponent<HexTile>());
-                        RemoveTileLocation();
-                    }
+                //if ( ! tilePlacedHere) {
+
+                //Try to create or grow a tile.
+                GameObject pickedTile = PickTile();
+                if (randomPlacement) {
+                    newTile = SpawnNewTile(pickedTile, columnToPlaceIn, rowToPlaceIn);
+                    //tilesToGrowFrom.Add(newTile.GetComponent<HexTile>());
+                    //RemoveTileLocation();
+
+                    //Set this new tile as the seed
+                    tileToGrowFrom = newTile.GetComponent<HexTile>();
+                    growthCount = 6;
+                    //Debug.Log("Tile at " + tileToGrowFrom.tileColumn + ", " + tileToGrowFrom.tileRow + " has been set as the tile to grow from.");
+                    randomPlacement = false;
+
+                } else if (CanGrow(pickedTile.GetComponent<HexTile>().currentTile) && CanGrowHere(columnToPlaceIn, rowToPlaceIn)) {
+                    newTile = SpawnNewTile(pickedTile, columnToPlaceIn, rowToPlaceIn);
+                    //tilesToGrowFrom.Add(newTile.GetComponent<HexTile>());
+                    //RemoveTileLocation();
                 }
+                //}
                 if (growthCount < 0) {
                     tilesToGrowFrom.Remove(tileToGrowFrom);
                     tilesToGrowFrom.TrimExcess();
@@ -338,8 +348,11 @@ public class TilePlacer : MonoBehaviour {
             if (newHex) {
                 newHex.tileColumn = column;
                 newHex.tileRow = row;
+                tilesToGrowFrom.Add(newHex);
                 //Debug.Log("New Hex Tile created at Column " + newHex.tileColumn + ", Row " + newHex.tileRow);
             }
+
+            RemoveTileLocation();
         }
         return tile;
     }
