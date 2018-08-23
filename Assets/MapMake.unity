@@ -2400,8 +2400,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 153216847b39dd241acca823df04be9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxColumns: 10
-  maxRows: 10
+  maxColumns: 20
+  maxRows: 20
 --- !u!1 &1013505780
 GameObject:
   m_ObjectHideFlags: 0

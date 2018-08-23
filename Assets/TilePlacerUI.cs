@@ -73,10 +73,6 @@ public class TilePlacerUI : MonoBehaviour {
         Assert.IsNotNull(textColumnsPlace, "TilePlacerUI could not find the Text Columns Place object.");
         textColumnsValue = GameObject.Find("Text Columns Value").GetComponent<Text>();
         Assert.IsNotNull(textColumnsValue, "TilePlacerUI could not find the Text Columns Value object.");
-        columns = maxColumns;
-        sliderColumns.maxValue = maxColumns;
-        sliderColumns.value = maxColumns;
-        textColumnsPlace.text = maxColumns.ToString();
 
         sliderRows = GameObject.Find("Slider Rows").GetComponent<Slider>();
         Assert.IsNotNull(sliderRows, "TilePlacerUI could not find the Slider Rows object.");
@@ -86,10 +82,6 @@ public class TilePlacerUI : MonoBehaviour {
         Assert.IsNotNull(textRowsPlace, "TilePlacerUI could not find the Text Rows Place object.");
         textRowsValue = GameObject.Find("Text Rows Value").GetComponent<Text>();
         Assert.IsNotNull(textRowsValue, "TilePlacerUI could not find the Text Rows Value object.");
-        rows = maxRows;
-        sliderRows.maxValue = maxRows;
-        sliderRows.value = maxRows;
-        textRowsPlace.text = maxRows.ToString();
 
         sliderPlainsWeight = GameObject.Find("Slider Plains Weight").GetComponent<Slider>();
         Assert.IsNotNull(sliderPlainsWeight, "TilePlacerUI could not find the Slider Plains Weight object.");
@@ -99,8 +91,6 @@ public class TilePlacerUI : MonoBehaviour {
         Assert.IsNotNull(textPlainsWeightPlace, "TilePlacerUI could not find the Text Plains Weight Place object.");
         textPlainsWeightValue = GameObject.Find("Text Plains Weight Value").GetComponent<Text>();
         Assert.IsNotNull(textPlainsWeightValue, "TilePlacerUI could not find the Text Plains Weight Value object.");
-        plainsWeight = Mathf.RoundToInt(sliderPlainsWeight.value);
-        textPlainsWeightPlace.text = plainsWeight.ToString();
 
         sliderPlainsRate = GameObject.Find("Slider Plains Rate").GetComponent<Slider>();
         Assert.IsNotNull(sliderPlainsRate, "TilePlacerUI could not find the Slider Plains Rate object.");
@@ -110,8 +100,6 @@ public class TilePlacerUI : MonoBehaviour {
         Assert.IsNotNull(textPlainsRatePlace, "TilePlacerUI could not find the Text Plains Rate Place object.");
         textPlainsRateValue = GameObject.Find("Text Plains Rate Value").GetComponent<Text>();
         Assert.IsNotNull(textPlainsRateValue, "TilePlacerUI could not find the Text Plains Rate Value object.");
-        plainsRate = Mathf.RoundToInt(sliderPlainsRate.value);
-        textPlainsRatePlace.text = plainsRate.ToString();
 
         sliderForestWeight = GameObject.Find("Slider Forest Weight").GetComponent<Slider>();
         Assert.IsNotNull(sliderForestWeight, "TilePlacerUI could not find the Slider Forest Weight object.");
@@ -121,8 +109,6 @@ public class TilePlacerUI : MonoBehaviour {
         Assert.IsNotNull(textForestWeightPlace, "TilePlacerUI could not find the Text Forest Weight Place object.");
         textForestWeightValue = GameObject.Find("Text Forest Weight Value").GetComponent<Text>();
         Assert.IsNotNull(textForestWeightValue, "TilePlacerUI could not find the Text Forsest Weight Value object.");
-        forestWeight = Mathf.RoundToInt(sliderForestWeight.value);
-        textForestWeightPlace.text = forestWeight.ToString();
 
         sliderForestRate = GameObject.Find("Slider Forest Rate").GetComponent<Slider>();
         Assert.IsNotNull(sliderForestRate, "TilePlacerUI could not find the Slider Forest Rate object.");
@@ -132,6 +118,26 @@ public class TilePlacerUI : MonoBehaviour {
         Assert.IsNotNull(textForestRatePlace, "TilePlacerUI could not find the Text Forest Rate Place object.");
         textForestRateValue = GameObject.Find("Text Forest Rate Value").GetComponent<Text>();
         Assert.IsNotNull(textForestRateValue, "TilePlacerUI could not find the Text Forest Rate Value object.");
+
+        columns = maxColumns;
+        sliderColumns.maxValue = maxColumns;
+        sliderColumns.value = maxColumns;
+        textColumnsPlace.text = maxColumns.ToString();
+
+        rows = maxRows;
+        sliderRows.maxValue = maxRows;
+        sliderRows.value = maxRows;
+        textRowsPlace.text = maxRows.ToString();
+
+        plainsWeight = Mathf.RoundToInt(sliderPlainsWeight.value);
+        textPlainsWeightPlace.text = plainsWeight.ToString();
+
+        plainsRate = Mathf.RoundToInt(sliderPlainsRate.value);
+        textPlainsRatePlace.text = plainsRate.ToString();
+
+        forestWeight = Mathf.RoundToInt(sliderForestWeight.value);
+        textForestWeightPlace.text = forestWeight.ToString();
+
         forestRate = Mathf.RoundToInt(sliderForestRate.value);
         textForestRatePlace.text = forestRate.ToString();
     }
